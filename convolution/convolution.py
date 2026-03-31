@@ -1,54 +1,34 @@
+import os
 import cv2
 import numpy as np
-from pathlib import Path
-
-
-
-def find_image(candidates):
-    for name in candidates:
-        p = Path(name)
-        if p.exists():
-            return str(p)
-    raise FileNotFoundError(f"이미지를 찾지 못했습니다. 후보 파일명: {candidates}")
-
-
-
-def save_image(path, image):
-    ok = cv2.imwrite(str(path), image)
-    if not ok:
-        raise RuntimeError(f"이미지 저장 실패: {path}")
-
-
-
+import matplotlib.pyplot as plt
 def main():
-    gray = cv2.imread("./input/grayscale.jpg", cv2.IMREAD_GRAYSCALE)
-    binary = cv2.imread("./input/binary.png", cv2.IMREAD_GRAYSCALE)
+    binary = cv2.imread("./inputs/binary.png", cv2.IMREAD_GRAYSCALE)
     _, binary = cv2.threshold(binary, 127, 255, cv2.THRESH_BINARY)
 
-
     kernel = np.ones((3, 3), dtype=np.uint8)
-
-
-    gray_dilation = cv2.dilate(gray, kernel, iterations=1)
-    gray_erosion = cv2.erode(gray, kernel, iterations=1)
-
 
     binary_dilation = cv2.dilate(binary, kernel, iterations=1)
     binary_erosion = cv2.erode(binary, kernel, iterations=1)
 
+    os.makedirs("outputs", exist_ok=True)
+    
+    fig, ax = plt.subplots(1, 3, figsize=(12, 4))
 
-    output_dir = Path('output_images')
-    output_dir.mkdir(exist_ok=True)
-    save_image(output_dir / 'gray_dilation.png', gray_dilation)
-    save_image(output_dir / 'gray_erosion.png', gray_erosion)
-    save_image(output_dir / 'binary_dilation.png', binary_dilation)
-    save_image(output_dir / 'binary_erosion.png', binary_erosion)
+    ax[0].imshow(binary, cmap="gray")
+    ax[0].set_title("Binary")
+    ax[0].axis("off")
 
+    ax[1].imshow(binary_dilation, cmap="gray")
+    ax[1].set_title("Dilation")
+    ax[1].axis("off")
 
-    print('저장 완료:')
-    for name in ['gray_dilation.png', 'gray_erosion.png', 'binary_dilation.png', 'binary_erosion.png']:
-        print(output_dir / name)
+    ax[2].imshow(binary_erosion, cmap="gray")
+    ax[2].set_title("Erosion")
+    ax[2].axis("off")
 
+    plt.tight_layout()
+    plt.savefig("outputs/result.png", dpi=200)
+    plt.show()
 
-if __name__ == '__main__':
-    main()
+main()
