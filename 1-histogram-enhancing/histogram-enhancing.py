@@ -1,4 +1,3 @@
-import os
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
@@ -28,7 +27,7 @@ def histogram_equlize(channel):
     return lut[channel]
 
 
-def enhance_image(input_path, output_path):
+def enhance_image(input_path):
     img_gray = cv2.imread(input_path, cv2.IMREAD_GRAYSCALE)
 
     if img_gray is None:
@@ -36,20 +35,16 @@ def enhance_image(input_path, output_path):
 
     result_gray = histogram_equlize(img_gray)
 
-    ok = cv2.imwrite(output_path, result_gray)
-    if not ok:
-        raise ValueError(f"이미지 저장 실패: {output_path}")
-
     return img_gray, result_gray
 
 
-def compute_metrics(ref_gray, test_gray):
-    ref_f = ref_gray.astype(np.float32)
-    test_f = test_gray.astype(np.float32)
+def compute_metrics(input_img, output_img):
+    input_f = input_img.astype(np.float32)
+    output_f = output_img.astype(np.float32)
 
-    mse = mean_squared_error(ref_f, test_f)
-    psnr = peak_signal_noise_ratio(ref_f, test_f, data_range=255)
-    ssim = structural_similarity(ref_f, test_f, data_range=255)
+    mse = mean_squared_error(input_f, output_f)
+    psnr = peak_signal_noise_ratio(input_f, output_f, data_range=255)
+    ssim = structural_similarity(input_f, output_f, data_range=255)
 
     return mse, psnr, ssim
 
@@ -95,13 +90,10 @@ def plot_result(input_img, output_img, save_path):
 
 
 def main():
-    os.makedirs("outputs", exist_ok=True)
+    input_path = "1-histogram-enhancing/inputs/grayscale.jpg"
+    figure_path = "1-histogram-enhancing/result.png"
 
-    input_path = "inputs/grayscale.jpg"
-    output_path = "outputs/output_gray_he.jpg"
-    figure_path = "outputs/grayscale_hist_equalization.png"
-
-    input_img, output_img = enhance_image(input_path, output_path)
+    input_img, output_img = enhance_image(input_path)
     plot_result(input_img, output_img, figure_path)
 
 main()
